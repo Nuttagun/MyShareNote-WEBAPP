@@ -1,0 +1,101 @@
+version: '3.8'
+
+networks:
+  webproxy:
+    name: webproxy
+    driver: bridge
+  microservice:
+    name: microservice
+    driver: bridge
+
+services:
+  reverse-proxy:
+    build: ./reverse-proxy
+    container_name: reverse-proxy
+    restart: always
+    networks:
+      - webproxy
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - api-gateway
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    networks:
+      - microservice
+    restart: always
+    ports:
+      - "5671:5672"
+      - "15672:15672"
+
+  note-db:
+    image: postgres:13
+    container_name: note-db
+    restart: always
+    networks:
+      - microservice
+    environment:
+      POSTGRES_DB: note_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - note-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  note-service:
+    build: ./note-service
+    container_name: note-service
+    restart: always
+    networks:
+      - microservice
+    depends_on:
+      - note-db
+      - rabbitmq
+    ports:
+      - "5001:5001"
+
+  social-service:
+    build: ./social-service
+    container_name: social-service
+    restart: always
+    networks:
+      - microservice
+    depends_on:
+      - note-db
+      - rabbitmq
+    ports:
+      - "5002:5002"
+
+  frontend:
+    build: ./frontend 
+    container_name: react_frontend
+    restart: always
+    depends_on:
+      - note-db
+    networks:
+      - webproxy
+    ports:
+      - "5173:5173" 
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    networks:
+      - webproxy
+      - microservice
+    ports:
+      - "8080:80"
+    depends_on:
+      - note-service
+      - social-service
+      - rabbitmq
+
+volumes:
+  note-data:
