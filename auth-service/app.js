@@ -5,7 +5,7 @@ const amqp = require('amqplib');
 const app = express();
 app.use(express.json());
 
-const PORT = 5002;
+const PORT = 5003;
 
 // PostgreSQL connection
 const client = new Client({
@@ -41,10 +41,10 @@ const connectRabbitMQ = async () => {
 };
 
 // CRUD Operations
-app.get('/api/socails', async (req, res) => {
+app.get('/api/auths', async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM notes');
-    res.json({ message: 'social service', data: result.rows });
+    res.json({ message: 'auth service', data: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
