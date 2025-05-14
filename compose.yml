@@ -45,18 +45,6 @@ services:
       - note-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  note-service:
-    build: ./note-service
-    container_name: note-service
-    restart: always
-    networks:
-      - microservice
-    depends_on:
-      - note-db
-      - rabbitmq
-    ports:
-      - "5002:5002"
-
   social-service:
     build: ./social-service
     container_name: social-service
@@ -68,6 +56,18 @@ services:
       - rabbitmq
     ports:
       - "5001:5001"
+
+  note-service:
+    build: ./note-service
+    container_name: note-service
+    restart: always
+    networks:
+      - microservice
+    depends_on:
+      - note-db
+      - rabbitmq
+    ports:
+      - "5002:5002"
 
   auth-service:
     build: ./auth-service
