@@ -41,6 +41,9 @@ const connectRabbitMQ = async () => {
 };
 
 // CRUD Operations
+app.get('/hello', (req, res) => {
+  res.status(200).json({ message: 'Hello, world!' });
+});
 
 app.get('/api/socials', async (req, res) => {
   try {

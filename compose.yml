@@ -43,7 +43,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - note-data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   note-service:
     build: ./note-service
@@ -55,7 +55,7 @@ services:
       - note-db
       - rabbitmq
     ports:
-      - "5001:5001"
+      - "5002:5002"
 
   social-service:
     build: ./social-service
@@ -67,7 +67,20 @@ services:
       - note-db
       - rabbitmq
     ports:
-      - "5002:5002"
+      - "5001:5001"
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    restart: always
+    networks:
+      - microservice
+    depends_on:
+      - note-db
+      - rabbitmq
+    ports:
+      - "5003:5003"
+
 
   frontend:
     build: ./frontend 

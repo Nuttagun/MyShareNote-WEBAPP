@@ -5,7 +5,7 @@ const amqp = require('amqplib');
 const app = express();
 app.use(express.json());
 
-const PORT = 5001;
+const PORT = 5002;
 
 // PostgreSQL connection
 const client = new Client({
@@ -39,6 +39,10 @@ const connectRabbitMQ = async () => {
     process.exit(1);
   }
 };
+// HELLO API
+app.get('/hello', (req, res) => {
+  res.status(200).json({ message: 'Hello, world!' });
+});
 
 // CRUD Operations
 app.post('/api/notes', async (req, res) => {
