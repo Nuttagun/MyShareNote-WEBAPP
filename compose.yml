@@ -81,6 +81,18 @@ services:
     ports:
       - "5003:5003"
 
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    restart: always
+    networks:
+      - microservice
+    depends_on:
+      - note-db
+      - rabbitmq
+    ports:
+      - "5004:5004"
+
 
   frontend:
     build: ./frontend 
@@ -108,6 +120,8 @@ services:
     depends_on:
       - note-service
       - social-service
+      - auth-service
+      - notification-service
       - rabbitmq
 
 volumes:
