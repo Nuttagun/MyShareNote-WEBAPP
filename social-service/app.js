@@ -5,7 +5,7 @@ const amqp = require('amqplib');
 const app = express();
 app.use(express.json());
 
-const PORT = 5002;
+const PORT = 5001;
 
 // PostgreSQL connection
 const client = new Client({

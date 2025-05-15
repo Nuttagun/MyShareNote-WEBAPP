@@ -1,15 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AuthForm from './page/authFrom';
-import Home from './page/home';
-function App() {
+import React from 'react';
+import ConfigRoutes from './routes/mainroutes';
+
+const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/auth" element={<AuthForm />} />
-      </Routes>
-    </Router>
+      <ConfigRoutes />
   );
-}
+};
 
 export default App;
