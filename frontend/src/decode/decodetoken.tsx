@@ -35,8 +35,6 @@ export function useUserInfo(): UserInfo | undefined {
             username: decoded.username,
             email: decoded.email,
           });
-              localStorage.setItem('user_id', decoded.user_id);
-             localStorage.setItem('email', decoded.email);
         }
       } catch (error) {
         console.error('Error decoding token:', error);
