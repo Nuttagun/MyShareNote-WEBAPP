@@ -12,9 +12,10 @@ const PORT = 5003;
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: ['http://localhost:5173', 'http://localhost:8080'],
   credentials: true,
 }));
+
 app.use(express.json());
 
 // PostgreSQL connection
@@ -55,7 +56,6 @@ app.get('/hello', (req, res) => {
   res.status(200).json({ message: 'Hello, world!' });
 });
 
-// REGISTER
 // REGISTER
 app.post('/auth/register', async (req, res) => {
   const { username, email, password } = req.body;
