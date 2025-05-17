@@ -41,14 +41,29 @@ const connectRabbitMQ = async () => {
 };
 
 // CRUD Operations
-app.get('/api/notifications', async (req, res) => {
+// app.get('/api/notifications', async (req, res) => {
+//   try {
+//     const result = await client.query('SELECT * FROM notes');
+//     res.json({ message: 'notification service', data: result.rows });
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
+app.get('/api/notifications/:userId', async (req, res) => {
+  const { userId } = req.params;
+
   try {
-    const result = await client.query('SELECT * FROM notes');
-    res.json({ message: 'notification service', data: result.rows });
+    const result = await client.query(
+      'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    res.json({ notifications: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 
 
 // RPC handler
@@ -69,6 +84,46 @@ const handleRPCRequest = async (msg) => {
   }
 };
 
+const saveNotification = async (userId, message) => {
+  try {
+    await client.query(
+      'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
+      [userId, message]
+    );
+    console.log(`✅ แจ้งเตือนถูกบันทึกให้ ${userId}`);
+  } catch (err) {
+    console.error('❌ บันทึกแจ้งเตือนล้มเหลว:', err);
+  }
+};
+
+
+const startEventConsumer = async () => {
+  const eventQueue = 'notification_event_queue';
+
+  await channel.assertQueue(eventQueue, { durable: false });
+
+  channel.consume(eventQueue, async msg => {
+    const data = JSON.parse(msg.content.toString());
+
+    if (data.type === 'note_shared') {
+      console.log(`📩 แชร์โน้ต: จาก ${data.fromUser} ถึง ${data.user_id}: ${data.message}`);
+      await saveNotification(data.user_id, data.message);
+    }
+
+    if (data.type === 'note_liked') {
+      const message = `${data.fromUser} liked your note "${data.noteTitle}"`;
+      console.log(`👍 ไลก์โน้ต: ${message}`);
+      await saveNotification(data.user_id, message);
+    }
+
+    channel.ack(msg);
+  });
+
+  console.log('✅ Listening for notification events...');
+};
+
+
+
 // Start consuming RPC requests
 const startRPCServer = async () => {
   await connectRabbitMQ();
@@ -88,6 +143,7 @@ process.on('SIGINT', async () => {
 const startServer = async () => {
   await connectDB();
   await startRPCServer();
+  await startEventConsumer();
 
   app.listen(PORT, () => {
     console.log(`Note Service running on port ${PORT}`);
