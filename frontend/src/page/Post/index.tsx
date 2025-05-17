@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import type { NotesInterface } from "../../interface/INote";
 import { getNotes } from "../../service/post";
-import { Card } from "antd";
+import { Card,Button } from "antd";
+import ModalReview from "./modal"
 import "./test.css";
 
 const Review = () => {
   const [notes, setNotes] = useState<NotesInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
   const fetchNotes = async () => {
     try {
@@ -34,6 +36,12 @@ const Review = () => {
     const truncated = truncateText(description);
     return <span dangerouslySetInnerHTML={{ __html: truncated }} />;
   };
+
+    const showModal = () => {
+    setIsModalVisible(true);
+};
+
+const handleCancel = () => {setIsModalVisible(false);};
 
   useEffect(() => {
     fetchNotes();
@@ -66,7 +74,7 @@ const Review = () => {
               <Card key={note.note_id} className="review-card">
                 <div className="review-container">
                   <div className="reviews-comment-text">
-                    <p>Post By: {note.username ?? "Unknown User"}</p>
+                    <p>Post By : {note.username ?? "Unknown User"}</p>
                     <p>{renderDescription(note.description)}</p>
                   </div>
                   <hr />
@@ -76,7 +84,12 @@ const Review = () => {
           </div>
         )}
       </div>
-
+      <footer>
+        <center className="reviews-readmore">
+          <Button type="link" style={{  display: 'block',textAlign: 'center',color: '#002A48',margin: '10px 0',}} onClick={showModal}>Read More Visitor Reviews</Button>
+        </center>
+      </footer>
+      <ModalReview isVisible={isModalVisible} handleCancel={handleCancel} />
       <br />
     </div>
   );

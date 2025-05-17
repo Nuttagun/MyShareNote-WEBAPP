@@ -1,0 +1,31 @@
+.mypost{
+    background-color: gray;
+    width: 200px;
+    height: 50px;
+    border-radius: 15px;
+    margin-left: 30px;
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border: 2px solid gray;
+    color: white;
+    font-size: 24px;
+}
+
+.mynotes-1{
+    background-color: gray;
+    width: 150px;
+    height: 40px;
+    border-radius: 5px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    border: 2px solid gray;
+    color: white;
+    font-size: 20px;
+    margin-bottom: 10px;
+}

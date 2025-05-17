@@ -25,7 +25,7 @@
 
 .ant-modal {
     width: 75% !important; 
-    max-width: 1200px; 
+    max-width: 1300px; 
     overflow: hidden; 
 }
 
@@ -88,7 +88,7 @@
 
 .review-list-container {
     display: flex;
-    height: 300px;
+    height: 400px;
     flex-direction: column;
     overflow-y: auto;
 }
