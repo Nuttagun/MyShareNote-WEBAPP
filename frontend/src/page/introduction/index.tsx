@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import  { useState,useEffect } from "react";
 import picture1 from "../../assets/3405349.jpg";
 import { FaPlus } from "react-icons/fa6";
 import { Button } from "@mui/material";
@@ -7,9 +7,16 @@ import ModalCreate from "../CreatePost/index";
 
 const Index = () => {
   const [modalOpen, setModalOpen] = useState(false);
+    const [user, setUser] = useState<number>(
+    Number(localStorage.getItem("user_id")) || 0
+  );
+
+  useEffect(() => {
+    setUser(Number(localStorage.getItem("user_id")));
+  }, []);
 
   const CourseID = 1;
-  const UserID = "u1747469089074";
+  const UserID = user;
 
   const handleNoteSubmit = (courseId: number) => {
     console.log("Note submitted for course:", courseId);
