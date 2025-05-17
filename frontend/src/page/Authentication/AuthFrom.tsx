@@ -8,7 +8,7 @@ export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    username: "",  // เปลี่ยนจาก name เป็น username
+    username: "",  
     email: "",
     password: "",
   });
