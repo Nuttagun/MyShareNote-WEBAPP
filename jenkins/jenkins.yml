@@ -4,7 +4,7 @@ services:
     build: .
     container_name: jenkins
     ports:
-      - "9090:8080"  
+      - "60000:8080"  
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
