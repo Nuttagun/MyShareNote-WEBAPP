@@ -50,11 +50,8 @@ const AppBar = () => {
     setAnchorMyAcc(null);
   };
 
-  const [anchorHardware, setAnchorHardware] = React.useState<null | HTMLElement>(null);// @ts-ignore
-  const openHardware = Boolean(anchorHardware);
-
-  const handleClickHardware = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorHardware(event.currentTarget);
+  const handleClickHardware = () => {
+    navigate('/mypost'); 
   };
 
 
