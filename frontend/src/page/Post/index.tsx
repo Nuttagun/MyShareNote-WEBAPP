@@ -75,6 +75,7 @@ const handleCancel = () => {setIsModalVisible(false);};
                 <div className="review-container">
                   <div className="reviews-comment-text">
                     <p>Post By : {note.username ?? "Unknown User"}</p>
+                    <p>Title : {note.title}</p>
                     <p>{renderDescription(note.description)}</p>
                   </div>
                   <hr />

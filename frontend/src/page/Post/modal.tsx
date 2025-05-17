@@ -100,6 +100,7 @@ const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
                     <div className="review-container">
                       <div className="reviews-comment-text">
                         Post By : <span style={{ fontWeight: "bold" }}>{review.username}</span>
+                        <p>Title : {review.title}</p>
                         <p className="comment-reviews-render">{renderComment(review)}</p>
                       </div>
                     </div>
