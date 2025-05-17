@@ -1,17 +1,20 @@
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (
-    user_id VARCHAR(50) PRIMARY KEY,
+    user_id SERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,  
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
 CREATE TABLE IF NOT EXISTS notes (
     note_id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL,
-    user_id VARCHAR(50) NOT NULL,
+    user_id INTEGER NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
         REFERENCES users(user_id)
@@ -40,8 +43,8 @@ CREATE TABLE notifications (
 );
 
 INSERT INTO users (user_id, username, email, password_hash) VALUES
-('1', 'alice', 'alice@example.com', 'hashed_password_1'),
-('2', 'bob', 'bob@example.com', 'hashed_password_2');
+('alice', 'alice@example.com', 'hashed_password_1'),
+('bob', 'bob@example.com', 'hashed_password_2');
 
 INSERT INTO notes (title, description, status, user_id) VALUES
 ('Note 1', 'Description for note 1', 'active', '1'),

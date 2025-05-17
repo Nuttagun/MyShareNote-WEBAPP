@@ -46,9 +46,6 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 
-
-
-
   prometheus:
     image: prom/prometheus
     container_name: prometheus
