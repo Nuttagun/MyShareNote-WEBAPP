@@ -22,15 +22,21 @@ export function useUserInfo(): UserInfo | undefined {
     const token = localStorage.getItem('token');
     console.log('Token จาก localStorage:', token);
 
+
     if (token) {
       try {
         const decoded = jwtDecode<JwtPayload>(token);
-        if (decoded?.user_id || decoded?.username || decoded?.email) {
+        if (decoded.user_id || decoded.username || decoded.email) {
+        if (decoded.user_id) localStorage.setItem('user_id', decoded.user_id);
+        if (decoded.email) localStorage.setItem('email', decoded.email);
+
           setUserInfo({
             user_id: decoded.user_id,
             username: decoded.username,
             email: decoded.email,
           });
+              localStorage.setItem('user_id', decoded.user_id);
+             localStorage.setItem('email', decoded.email);
         }
       } catch (error) {
         console.error('Error decoding token:', error);
