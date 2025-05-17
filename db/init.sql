@@ -1,10 +1,13 @@
+DROP TABLE IF EXISTS users;
+
 CREATE TABLE users (
-    user_id VARCHAR(50) PRIMARY KEY,
+    user_id SERIAL PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,  
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE IF NOT EXISTS notes (
     note_id SERIAL PRIMARY KEY,

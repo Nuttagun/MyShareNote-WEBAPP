@@ -12,7 +12,7 @@ const PORT = 5003;
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:8080'],
+  origin: ['http://localhost:5173','http://localhost:5174', 'http://localhost:8080'],
   credentials: true,
 }));
 
@@ -62,21 +62,24 @@ app.post('/auth/register', async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = 'u' + Date.now(); // สร้าง ID แบบง่าย ๆ
 
-    await client.query(
-      'INSERT INTO users (user_id, username, email, password_hash) VALUES ($1, $2, $3, $4)',
-      [userId, username, email, hashedPassword]
+    // INSERT แล้วดึง user_id ที่ DB สร้างมาให้
+    const result = await client.query(
+      `INSERT INTO users (username, email, password_hash)
+       VALUES ($1, $2, $3)
+       RETURNING user_id`,
+      [username, email, hashedPassword]
     );
 
-    // ✅ สร้าง token
+    const userId = result.rows[0].user_id;  
+
+    // สร้าง token โดยฝัง user_id, username, email
     const token = jwt.sign(
-      { user_id: userId, username },
+      { user_id: userId, username, email },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // ✅ ส่ง token และ token_type
     res.status(201).json({
       message: 'User registered successfully',
       token,
@@ -111,7 +114,7 @@ app.post('/auth/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { user_id: user.user_id, username: user.username },
+      { user_id: user.user_id, username: user.username,email: user.email },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -171,6 +174,27 @@ const handleRPCRequest = async (msg) => {
     console.error('RPC Handling Error:', err);
   }
 };
+
+app.get('/auth/users/:id', authenticate, async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const result = await client.query(
+      'SELECT user_id, username, email FROM users WHERE user_id = $1',
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Get user by ID error:', err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
 
 // Start consuming RPC requests
 const startRPCServer = async () => {
