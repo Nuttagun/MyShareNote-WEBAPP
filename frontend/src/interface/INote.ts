@@ -3,6 +3,6 @@ export interface NotesInterface {
   title: string;
   description: string;
   status: string; // เช่น "active", "pending", etc.
-  userId: string;
-  username: string
+  userId: number | string;
+  username: string;
 }

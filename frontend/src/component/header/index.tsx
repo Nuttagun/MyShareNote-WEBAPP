@@ -9,11 +9,15 @@ import { PiSignOutBold } from "react-icons/pi";
 import { Link, useNavigate } from "react-router-dom"
 import SUTHLOGO from "../../assets/logo.png"
 import { CgNotes } from "react-icons/cg";
+import NotificationBell from "../notification/notification";
 import { useUserInfo } from "../../decode/decodetoken";
 import { useUserID } from "../../decode/decodetoken";
+  
+
 const AppBar = () => {
   const navigate = useNavigate();// @ts-ignore
   const [username, setUsername] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const userInfo = useUserInfo();
   const uId = useUserID();
   useEffect(() => {
@@ -24,6 +28,7 @@ const AppBar = () => {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         setUsername(payload.username || payload.name || payload.email); // รองรับหลายชื่อ field
+        setUserId(payload.userId || payload.sub || null); 
       } catch (error) {
         localStorage.removeItem('token');
         navigate('/auth');
@@ -74,7 +79,9 @@ const AppBar = () => {
           </Button>
         </div>
 
-        <div className="part2 w-[40%] flex items-center justify-end">
+        <div className="part2 w-[40%] flex items-center justify-end gap-4">
+
+          <NotificationBell userId={userId || ""}/>
 
           <div className="relative">
             <div

@@ -46,14 +46,15 @@ const connectRabbitMQ = async () => {
     process.exit(1);
   }
 };
-
-// CRUD Routes
-
+// CREATE Note
 app.post('/api/notes', async (req, res) => {
-  const { title, description, status, userId } = req.body;
-  if (!title || !description || !status || !userId) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  let { title, description, status, userId } = req.body;
+  userId = Number(userId); // แปลงเป็น number
+
+  if (!title || !description || !status || !userId || isNaN(userId)) {
+    return res.status(400).json({ error: 'Missing required fields or invalid userId' });
   }
+
   try {
     const result = await client.query(
       'INSERT INTO notes (title, description, status, user_id) VALUES ($1, $2, $3, $4) RETURNING note_id',
@@ -62,25 +63,32 @@ app.post('/api/notes', async (req, res) => {
 
     res.status(201).json({ message: 'Note created successfully', noteId: result.rows[0].note_id });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// READ all notes พร้อม username
 app.get('/api/notes', async (req, res) => {
   try {
     const result = await client.query(`
       SELECT n.*, u.username 
       FROM notes n
       JOIN users u ON n.user_id = u.user_id
+      ORDER BY n.note_id
     `);
     res.json(result.rows);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// READ note by id
 app.get('/api/notes/:noteId', async (req, res) => {
-  const { noteId } = req.params;
+  const noteId = Number(req.params.noteId);
+  if (isNaN(noteId)) return res.status(400).json({ error: 'Invalid noteId' });
+
   try {
     const result = await client.query('SELECT * FROM notes WHERE note_id = $1', [noteId]);
     if (result.rows.length > 0) {
@@ -89,15 +97,18 @@ app.get('/api/notes/:noteId', async (req, res) => {
       res.status(404).json({ error: 'Note not found' });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// UPDATE note (partial update)
 app.patch('/api/notes/:noteId', async (req, res) => {
-  const { noteId } = req.params;
+  const noteId = Number(req.params.noteId);
+  if (isNaN(noteId)) return res.status(400).json({ error: 'Invalid noteId' });
+
   const { title, description, status } = req.body;
 
-  // สร้าง dynamic query ตามฟิลด์ที่มีใน body
   const fields = [];
   const values = [];
   let index = 1;
@@ -129,13 +140,16 @@ app.patch('/api/notes/:noteId', async (req, res) => {
     }
     res.json({ message: 'Note updated successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-
+// DELETE note
 app.delete('/api/notes/:noteId', async (req, res) => {
-  const { noteId } = req.params;
+  const noteId = Number(req.params.noteId);
+  if (isNaN(noteId)) return res.status(400).json({ error: 'Invalid noteId' });
+
   try {
     const result = await client.query('DELETE FROM notes WHERE note_id = $1', [noteId]);
     if (result.rowCount === 0) {
@@ -143,6 +157,7 @@ app.delete('/api/notes/:noteId', async (req, res) => {
     }
     res.json({ message: 'Note deleted successfully' });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

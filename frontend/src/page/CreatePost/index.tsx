@@ -10,7 +10,7 @@ interface ModalProps {
     open: boolean;
     onClose: () => void;
     CourseID: number;
-    UserID: string;
+    UserID: number;
     onReviewSubmit: (courseId: number) => void;
 }
 
@@ -33,7 +33,7 @@ const ModalCreate: React.FC<ModalProps> = ({
 
         console.log("Data to send to createNote:", {
             ...values,
-            userId: UserID.toString(),
+            userId: Number(UserID),
             status: "active",
         });
 
@@ -41,7 +41,7 @@ const ModalCreate: React.FC<ModalProps> = ({
         try {
             const res = await createNote({
                 ...values,
-                userId: UserID.toString(),
+                userId: Number(UserID),
                 status: "active",
             });
 
