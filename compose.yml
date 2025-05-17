@@ -45,6 +45,49 @@ services:
       - note-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+
+
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    networks:
+      - webproxy
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.external-url=http://localhost/prometheus'
+    ports:
+    - "9090:9090" 
+
+
+  pushgateway:
+    image: prom/pushgateway
+    container_name: pushgateway
+    networks:
+      - webproxy
+    ports:
+      - "9091:9091"
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    networks:
+      - webproxy
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/grafana/
+    volumes:
+      - grafana_data:/var/lib/grafana
+    
+
+
+
+
   social-service:
     build: ./social-service
     container_name: social-service
@@ -126,3 +169,5 @@ services:
 
 volumes:
   note-data:
+  rabbitmq_data:
+  grafana_data:
