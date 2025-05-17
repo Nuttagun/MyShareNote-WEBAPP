@@ -1,4 +1,3 @@
-
 const express = require('express');
 const { Client } = require('pg');
 const amqp = require('amqplib');
@@ -13,7 +12,7 @@ const PORT = 5003;
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://localhost:5174',
   credentials: true,
 }));
 app.use(express.json());

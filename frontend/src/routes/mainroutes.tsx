@@ -5,6 +5,7 @@ import Loadable from "../component/third-patry/Loadable";
 import MainLayout from "../layout/MainLayout"; // <-- เพิ่ม Layout
 
 const Home = Loadable(lazy(() => import("../page/index")));
+const MyPost = Loadable(lazy(() => import("../page/MyPost/index")));
 const AuthForm = Loadable(lazy(() => import("../page/Authentication/AuthFrom")));
 
 const UserRoutes = (): RouteObject[] => [
@@ -13,6 +14,7 @@ const UserRoutes = (): RouteObject[] => [
     element: <MainLayout />, 
     children: [
       { path: "/", element: <Home /> },
+      { path: "/mypost", element: <MyPost /> },
     ],
   },
   { path: "/auth", element: <AuthForm /> },
