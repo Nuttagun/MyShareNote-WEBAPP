@@ -6,7 +6,7 @@ const amqp = require('amqplib');
 const app = express();
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'http://localhost:5174',
   credentials: true,
 }));
 
@@ -50,16 +50,17 @@ const connectRabbitMQ = async () => {
 // CRUD Routes
 
 app.post('/api/notes', async (req, res) => {
-  const { noteId, title, description, status, userId } = req.body;
-  if (!noteId || !title || !description || !status || !userId) {
+  const { title, description, status, userId } = req.body;
+  if (!title || !description || !status || !userId) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   try {
-    await client.query(
-      'INSERT INTO notes (note_id, title, description, status, user_id) VALUES ($1, $2, $3, $4, $5)',
-      [noteId, title, description, status, userId]
+    const result = await client.query(
+      'INSERT INTO notes (title, description, status, user_id) VALUES ($1, $2, $3, $4) RETURNING note_id',
+      [title, description, status, userId]
     );
-    res.status(201).json({ message: 'Note created successfully' });
+
+    res.status(201).json({ message: 'Note created successfully', noteId: result.rows[0].note_id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -67,7 +68,11 @@ app.post('/api/notes', async (req, res) => {
 
 app.get('/api/notes', async (req, res) => {
   try {
-    const result = await client.query('SELECT * FROM notes');
+    const result = await client.query(`
+      SELECT n.*, u.username 
+      FROM notes n
+      JOIN users u ON n.user_id = u.user_id
+    `);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -88,17 +93,37 @@ app.get('/api/notes/:noteId', async (req, res) => {
   }
 });
 
-app.put('/api/notes/:noteId', async (req, res) => {
+app.patch('/api/notes/:noteId', async (req, res) => {
   const { noteId } = req.params;
   const { title, description, status } = req.body;
-  if (!title || !description || !status) {
-    return res.status(400).json({ error: 'Missing required fields' });
+
+  // สร้าง dynamic query ตามฟิลด์ที่มีใน body
+  const fields = [];
+  const values = [];
+  let index = 1;
+
+  if (title !== undefined) {
+    fields.push(`title = $${index++}`);
+    values.push(title);
   }
+  if (description !== undefined) {
+    fields.push(`description = $${index++}`);
+    values.push(description);
+  }
+  if (status !== undefined) {
+    fields.push(`status = $${index++}`);
+    values.push(status);
+  }
+
+  if (fields.length === 0) {
+    return res.status(400).json({ error: 'No fields provided to update' });
+  }
+
+  values.push(noteId);
+  const query = `UPDATE notes SET ${fields.join(', ')} WHERE note_id = $${index}`;
+
   try {
-    const result = await client.query(
-      'UPDATE notes SET title = $1, description = $2, status = $3 WHERE note_id = $4',
-      [title, description, status, noteId]
-    );
+    const result = await client.query(query, values);
     if (result.rowCount === 0) {
       return res.status(404).json({ error: 'Note not found' });
     }
@@ -107,6 +132,7 @@ app.put('/api/notes/:noteId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.delete('/api/notes/:noteId', async (req, res) => {
   const { noteId } = req.params;

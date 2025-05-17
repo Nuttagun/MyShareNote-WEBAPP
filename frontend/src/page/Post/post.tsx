@@ -1,6 +1,6 @@
 // components/Blog.tsx
 import { useEffect, useState } from "react";
-import "./post.css";
+import "./post.css"
 import { getNotes } from "../../service/post";
 import type { NotesInterface } from "../../interface/INote";
 import { ArrowRight, ArrowLeft } from "lucide-react";
@@ -20,10 +20,12 @@ const Blog = () => {
       console.log("ListNote response:", res);
       if (Array.isArray(res)) {
         const mapped = res.map((note: any) => ({
-          ID: note.note_id,
-          Picture: "default.jpg",
-          Name: note.title,
-          Description: note.description,
+          note_id: note.note_id,
+          title: note.title,
+          description: note.description,
+          status: note.status,
+          userId: note.user_id,
+          username: note.username
         }));
         setAnimals(mapped);
       } else {
@@ -71,8 +73,8 @@ const Blog = () => {
         </div>
 
         <div className="mainContainer grid">
-          {displayedAnimals.map(({ ID, Picture, Name, Description }) => (
-            <div key={ID} className="singlePost grid">
+          {displayedAnimals.map(({ note_id, title, description }) => (
+            <div key={note_id} className="singlePost grid">
               <div
                 data-aos="fade-up"
                 data-aos-duration="2000"
@@ -86,13 +88,13 @@ const Blog = () => {
               </div>
               <div className="postDetails">
                 <h3 data-aos="fade-up" data-aos-duration="2500">
-                  {Name}
+                  {title}
                 </h3>
                 <p data-aos="fade-up" data-aos-duration="3000">
-                  {Description
-                    ? Description.length > 1
-                      ? `${Description.slice(0, 300)}`
-                      : Description
+                  {description
+                    ? description.length > 1
+                      ? `${description.slice(0, 300)}`
+                      : description
                     : "No description available"}
                 </p>
               </div>

@@ -1,4 +1,3 @@
-
 CREATE TABLE users (
     user_id VARCHAR(50) PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
@@ -8,7 +7,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE IF NOT EXISTS notes (
-    note_id VARCHAR(50) PRIMARY KEY,
+    note_id SERIAL PRIMARY KEY,
     title VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL,
@@ -44,8 +43,7 @@ INSERT INTO users (user_id, username, email, password_hash) VALUES
 ('1', 'alice', 'alice@example.com', 'hashed_password_1'),
 ('2', 'bob', 'bob@example.com', 'hashed_password_2');
 
--- Insert โน้ต 3 รายการ ที่ผูกกับผู้ใช้ u001 และ u002
-INSERT INTO notes (note_id, title, description, status, user_id) VALUES
-('1', 'Note 1', 'Description for note 1', 'active', '1'),
-('2', 'Note 2', 'Another note by Alice', 'archived', '2'),
-('3', 'Note 3', 'Note by Bob', 'active', '2');
+INSERT INTO notes (title, description, status, user_id) VALUES
+('Note 1', 'Description for note 1', 'active', '1'),
+('Note 2', 'Another note by Alice', 'archived', '2'),
+('Note 3', 'Note by Bob', 'active', '2');
