@@ -153,3 +153,35 @@
     margin-left: 20px;
     margin-right: 20px;
   }
+
+  * Add this to your test.css file */
+
+.review-card {
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.liked-note {
+  border: 2px solid #1890ff;
+  box-shadow: 0 0 8px rgba(24, 144, 255, 0.5);
+}
+
+.review-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.review-actions .ant-btn {
+  display: flex;
+  align-items: center;
+}
+
+.review-actions .ant-btn .anticon {
+  margin-right: 5px;
+}
+
+.review-actions .ant-btn-text:hover {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+}

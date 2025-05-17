@@ -48,3 +48,4 @@ INSERT INTO notes (title, description, status, user_id) VALUES
 ('Note 1', 'Description for note 1', 'active', 1),
 ('Note 2', 'Another note by Alice', 'archived', 1),
 ('Note 3', 'Note by Bob', 'active', 2);
+

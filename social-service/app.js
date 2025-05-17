@@ -1,11 +1,13 @@
 const express = require('express');
+const cors = require('cors');
 const { Client } = require('pg');
 const amqp = require('amqplib');
-const cors = require('cors');  
+
+// Comments in English for better maintainability
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:5173','http://localhost:5174', 'http://localhost:8080'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:8080'],
   credentials: true,
 }));
 
@@ -22,6 +24,20 @@ const client = new Client({
   port: 5432,
 });
 
+// RabbitMQ connection
+let channel;
+const connectRabbitMQ = async () => {
+  try {
+    const connection = await amqp.connect('amqp://guest:guest@rabbitmq');
+    channel = await connection.createChannel();
+    await channel.assertQueue('social_event_queue');
+    console.log('Connected to RabbitMQ');
+  } catch (err) {
+    console.error('Failed to connect to RabbitMQ', err);
+    process.exit(1);
+  }
+};
+
 const connectDB = async () => {
   try {
     await client.connect();
@@ -32,72 +48,95 @@ const connectDB = async () => {
   }
 };
 
-// RabbitMQ connection for RPC
-let channel;
-const connectRabbitMQ = async () => {
+// API Routes
+// Get likes count for a note
+app.get('/api/social/likes/:noteId', async (req, res) => {
   try {
-    const connection = await amqp.connect('amqp://guest:guest@rabbitmq');
-    channel = await connection.createChannel();
-    await channel.assertQueue('note_rpc_queue');
-    console.log('Connected to RabbitMQ');
-  } catch (err) {
-    console.error('Failed to connect to RabbitMQ', err);
-    process.exit(1);
-  }
-};
-
-// CRUD Operations
-app.get('/api/socails', async (req, res) => {
-  try {
-    const result = await client.query('SELECT * FROM notes');
-    res.json({ message: 'social service', data: result.rows });
+    const { noteId } = req.params;
+    const result = await client.query(
+      'SELECT COUNT(*) as likes FROM likes WHERE note_id = $1',
+      [noteId]
+    );
+    res.json({ likes: parseInt(result.rows[0].likes) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// RPC handler
-const handleRPCRequest = async (msg) => {
+// Like a note
+app.post('/api/social/like', async (req, res) => {
   try {
-    const nodeId = msg.content.toString();
-    const result = await client.query('SELECT * FROM notes WHERE node_id = $1', [nodeId]);
-    const response = result.rows.length > 0 ? result.rows[0] : { error: 'Note not found' };
-
-    channel.sendToQueue(
-      msg.properties.replyTo,
-      Buffer.from(JSON.stringify(response)),
-      { correlationId: msg.properties.correlationId }
+    const { noteId, userId, noteTitle, noteOwnerId } = req.body;
+    await client.query(
+      'INSERT INTO likes (note_id, user_id) VALUES ($1, $2)',
+      [noteId, userId]
     );
-    channel.ack(msg);
+
+    // Send notification event
+    channel.sendToQueue('notification_event_queue', 
+      Buffer.from(JSON.stringify({
+        type: 'note_liked',
+        noteId,
+        fromUser: userId,
+        user_id: noteOwnerId,
+        noteTitle
+      }))
+    );
+
+    res.json({ message: 'Note liked successfully' });
   } catch (err) {
-    console.error('RPC Handling Error:', err);
+    if (err.code === '23505') { // Unique violation
+      res.status(400).json({ error: 'Already liked this note' });
+    } else {
+      res.status(500).json({ error: err.message });
+    }
   }
-};
+});
 
-// Start consuming RPC requests
-const startRPCServer = async () => {
+// Unlike a note
+app.delete('/api/social/unlike/:noteId/:userId', async (req, res) => {
+  try {
+    const { noteId, userId } = req.params;
+    await client.query(
+      'DELETE FROM likes WHERE note_id = $1 AND user_id = $2',
+      [noteId, userId]
+    );
+    res.json({ message: 'Like removed successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get all likes by user
+app.get('/api/social/user-likes/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await client.query(
+      'SELECT note_id, created_at FROM likes WHERE user_id = $1',
+      [userId]
+    );
+    res.json({ likes: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Start server
+const startServer = async () => {
+  await connectDB();
   await connectRabbitMQ();
-  channel.consume('note_rpc_queue', handleRPCRequest);
-  console.log('Note Service is waiting for RPC requests...');
+
+  app.listen(PORT, () => {
+    console.log(`Social Service running on port ${PORT}`);
+  });
 };
 
-// Graceful Shutdown
+// Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('Shutting down gracefully...');
   if (client) await client.end();
   if (channel) await channel.close();
   process.exit(0);
 });
-
-// Start Services
-const startServer = async () => {
-  await connectDB();
-  await startRPCServer();
-
-  app.listen(PORT, () => {
-    console.log(`Note Service running on port ${PORT}`);
-  });
-};
 
 startServer();
