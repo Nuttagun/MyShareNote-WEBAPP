@@ -3,9 +3,11 @@ import type { NotesInterface } from "../../interface/INote";
 import { getNotes } from "../../service/post";
 import { Card, Button } from "antd";
 import ModalReview from "./modal";
-import { LikeOutlined, LikeFilled } from "@ant-design/icons"; // Import like icons
+import { HeartOutlined, HeartFilled } from "@ant-design/icons"; // Changed to heart icons
 import "./test.css";
-import { getLikesCount, likeNote, unlikeNote, getUserLikes } from "../../service/like"; // Import social service functions
+import "../../component/like/cute_like_button.css"; // Import the cute styles
+import { getLikesCount, likeNote, unlikeNote, getUserLikes } from "../../service/like";
+import CuteLikeButton from "../../component/like/cute_like_button_component.tsx";
 
 const Review = () => {
   const [notes, setNotes] = useState<NotesInterface[]>([]);
@@ -168,13 +170,13 @@ const Review = () => {
                     </div>
                     <hr />
                     <div className="review-actions">
-                      <Button 
-                        type="text" 
-                        icon={isLiked ? <LikeFilled /> : <LikeOutlined />} 
-                        onClick={() => handleLikeToggle(note)}
-                      >
-                        {likeCount} {likeCount === 1 ? 'Like' : 'Likes'}
-                      </Button>
+                      {/* Replace the standard button with our cute like button */}
+                      <CuteLikeButton 
+                        isLiked={isLiked}
+                        likeCount={likeCount}
+                        onLikeToggle={() => handleLikeToggle(note)}
+                        disabled={!userId}
+                      />
                     </div>
                   </div>
                 </Card>
