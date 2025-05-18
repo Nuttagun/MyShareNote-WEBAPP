@@ -197,7 +197,7 @@ const Review = () => {
             }} 
             onClick={showModal}
           >
-            Read More Visitor Reviews
+            Read More Post Note
           </Button>
         </center>
       </footer>
