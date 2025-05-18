@@ -67,6 +67,7 @@ services:
     container_name: pushgateway
     networks:
       - webproxy
+      - microservice  # เพิ่ม microservice network
     ports:
       - "9091:9091"
 
