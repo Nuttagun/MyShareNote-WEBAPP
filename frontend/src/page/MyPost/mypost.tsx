@@ -196,6 +196,7 @@ const Dashboard = () => {
           initialValues={{
             title: editNoteData.title,
             description: editNoteData.description,
+            picture: editNoteData.picture,
           }}
           onNoteUpdate={handleReloadNotes}
         />

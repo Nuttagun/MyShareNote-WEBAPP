@@ -145,8 +145,8 @@ const connectRabbitMQ = async () => {
 };
 // CREATE Note
 app.post('/api/notes', async (req, res) => {
-  let { title, description, status, userId } = req.body;
-  userId = Number(userId); // แปลงเป็น number
+  let { title, description, status, picture, userId } = req.body;
+  userId = Number(userId); // แปลง userId เป็นตัวเลข
 
   if (!title || !description || !status || !userId || isNaN(userId)) {
     return res.status(400).json({ error: 'Missing required fields or invalid userId' });
@@ -154,13 +154,16 @@ app.post('/api/notes', async (req, res) => {
 
   try {
     const result = await pgClient.query(
-      'INSERT INTO notes (title, description, status, user_id) VALUES ($1, $2, $3, $4) RETURNING note_id',
-      [title, description, status, userId]
+      `INSERT INTO notes (title, description, status, picture, user_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING note_id`,
+      [title, description, status, picture || null, userId]
     );
 
-
-    res.status(201).json({ message: 'Note created successfully', noteId: result.rows[0].note_id });
-    noteCreatedCounter.inc(); // <<< เพิ่มตรงนี้หลังสร้างสำเร็จ
+    res.status(201).json({
+      message: 'Note created successfully',
+      noteId: result.rows[0].note_id
+    });
+    noteCreatedCounter.inc(); // เพิ่ม metric หลังสร้างสำเร็จ
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -211,7 +214,7 @@ app.patch('/api/notes/:noteId', async (req, res) => {
   const noteId = Number(req.params.noteId);
   if (isNaN(noteId)) return res.status(400).json({ error: 'Invalid noteId' });
 
-  const { title, description, status } = req.body;
+  const { title, description, status, picture } = req.body;
 
   const fields = [];
   const values = [];
@@ -228,6 +231,10 @@ app.patch('/api/notes/:noteId', async (req, res) => {
   if (status !== undefined) {
     fields.push(`status = $${index++}`);
     values.push(status);
+  }
+  if (picture !== undefined) {
+    fields.push(`picture = $${index++}`);
+    values.push(picture);
   }
 
   if (fields.length === 0) {
@@ -248,7 +255,6 @@ app.patch('/api/notes/:noteId', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // DELETE note
 app.delete('/api/notes/:noteId', async (req, res) => {

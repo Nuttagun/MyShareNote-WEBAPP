@@ -11,7 +11,7 @@ interface ReviewModalProps {
 
 const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
   const [reviews, setReviews] = useState<NotesInterface[]>([]);
-  const [expandedReviewIds, setExpandedReviewIds] = useState<string[]>([]); // เปลี่ยนจาก number[] เป็น string[]
+  const [expandedReviewIds, setExpandedReviewIds] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +34,7 @@ const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
         : [...prev, noteId]
     );
   };
-
+// @ts-ignore
   const renderComment = (review: NotesInterface) => {
     const comment = review.description || "";
     const id = review.note_id;
@@ -89,7 +89,9 @@ const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
       className="modal-comment"
       centered
       title="All Post"
-    > <br /><br />
+    >
+      <br />
+      <br />
       <Row gutter={16} align="top">
         <Col span={24}>
           <Card>
@@ -101,7 +103,22 @@ const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
                       <div className="reviews-comment-text">
                         Post By : <span style={{ fontWeight: "bold" }}>{review.username}</span>
                         <p>Title : {review.title}</p>
-                        <p className="comment-reviews-render">{renderComment(review)}</p>
+
+                        {/* แสดงรูปเฉพาะเมื่อ picture เป็น string ที่ไม่ใช่ null หรือ undefined */}
+                        {typeof review.picture === "string" && review.picture.trim() !== "" && (
+                          <img
+                            src={review.picture}
+                            alt="Note Image"
+                            style={{
+                              maxWidth: "200px",
+                              maxHeight: "200px",
+                              marginBottom: "10px",
+                              borderRadius: "8px",
+                              objectFit: "cover",
+                              display: "block",
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                     <br />

@@ -13,6 +13,7 @@ CREATE TABLE notes (
     title VARCHAR(100) NOT NULL,
     description VARCHAR(255) NOT NULL,
     status VARCHAR(20) NOT NULL,
+    picture TEXT,
     user_id INTEGER NOT NULL,
     CONSTRAINT fk_user
         FOREIGN KEY (user_id)
@@ -44,8 +45,9 @@ INSERT INTO users (username, email, password_hash) VALUES
 ('alice', 'alice@example.com', 'hashed_password_1'),
 ('bob', 'bob@example.com', 'hashed_password_2');
 
-INSERT INTO notes (title, description, status, user_id) VALUES
-('Note 1', 'Description for note 1', 'active', 1),
-('Note 2', 'Another note by Alice', 'archived', 1),
-('Note 3', 'Note by Bob', 'active', 2);
+INSERT INTO notes (title, description, status, picture, user_id) VALUES
+('Note 1', 'Description for note 1', 'active', NULL, 1),
+('Note 2', 'Another note by Alice', 'archived', NULL, 1),
+('Note 3', 'Note by Bob', 'active', NULL, 2);
+
 

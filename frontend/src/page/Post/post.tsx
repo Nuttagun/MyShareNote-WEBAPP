@@ -25,6 +25,7 @@ const Blog = () => {
           description: note.description,
           status: note.status,
           userId: note.user_id,
+          user_id: note.user_id,
           username: note.username
         }));
         setAnimals(mapped);

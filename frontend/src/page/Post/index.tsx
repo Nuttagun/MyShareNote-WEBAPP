@@ -3,7 +3,6 @@ import type { NotesInterface } from "../../interface/INote";
 import { getNotes } from "../../service/post";
 import { Card, Button } from "antd";
 import ModalReview from "./modal";
-import { HeartOutlined, HeartFilled } from "@ant-design/icons"; // Changed to heart icons
 import "./test.css";
 import "../../component/like/cute_like_button.css"; // Import the cute styles
 import { getLikesCount, likeNote, unlikeNote, getUserLikes } from "../../service/like";
@@ -26,7 +25,7 @@ const Review = () => {
       if (res) {
         setNotes(res.slice(0, 6)); // แสดงแค่ 6 รายการ
         // Fetch likes count for each note
-        res.slice(0, 6).forEach((note) => {
+        res.slice(0, 6).forEach((note : any) => {
           fetchLikesCount(note.note_id);
         });
       }
@@ -62,7 +61,7 @@ const Review = () => {
         setUserId(currentUserId);
         const response = await getUserLikes(currentUserId);
         if (response && response.likes) {
-          const likedNoteIds = response.likes.map((like) => like.note_id);
+          const likedNoteIds = response.likes.map((like : any) => like.note_id);
           setUserLikedNotes(likedNoteIds);
         }
       }
@@ -80,7 +79,7 @@ const Review = () => {
         return;
       }
 
-      const noteId = note.note_id;
+      const noteId = note.note_id ?? "";
       const isLiked = userLikedNotes.includes(noteId);
 
       if (isLiked) {
@@ -154,6 +153,8 @@ const Review = () => {
           <div className="reviews-grid">
             {notes.map((note, index) => {
               const noteId = note.note_id;
+              console.log(index)
+              if (!noteId) return null;
               const isLiked = userLikedNotes.includes(noteId);
               const likeCount = likesCount[noteId] || 0;
               
