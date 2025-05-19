@@ -1,8 +1,10 @@
 export interface NotesInterface {
-  note_id?: string; // อาจไม่จำเป็นต้องส่งหาก backend สร้างให้
+  note_id?: string; 
   title: string;
   description: string;
-  status: string; // เช่น "active", "pending", etc.
+  status: string; 
   userId: number | string;
+  user_id: string;
   username: string;
+  picture?: string | null;  
 }
