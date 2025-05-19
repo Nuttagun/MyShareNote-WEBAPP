@@ -181,7 +181,7 @@ app.post('/api/social/like', async (req, res) => {
     likeCounter.inc({ note_id: noteId, user_id: userId });
 
     // Send notification event
-    channel.sendToQueue('notification_event_queue', 
+    channel.sendToQueue('social_event_queue', 
       Buffer.from(JSON.stringify({
         type: 'note_liked',
         noteId,

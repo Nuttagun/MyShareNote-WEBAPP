@@ -145,7 +145,7 @@ const connectRabbitMQ = async () => {
   try {
     const connection = await amqp.connect('amqp://guest:guest@rabbitmq');
     channel = await connection.createChannel();
-    await channel.assertQueue('note_rpc_queue');
+    await channel.assertQueue('auth_rpc_queue');
     console.log('Connected to RabbitMQ');
   } catch (err) {
     console.error('Failed to connect to RabbitMQ', err);
@@ -312,8 +312,8 @@ app.get('/metrics', async (req, res) => {
 // Start consuming RPC requests
 const startRPCServer = async () => {
   await connectRabbitMQ();
-  channel.consume('note_rpc_queue', handleRPCRequest);
-  console.log('Note Service is waiting for RPC requests...');
+  channel.consume('auth_rpc_queue', handleRPCRequest);
+  console.log('Auth Service is waiting for RPC requests...');
 };
 
 // Graceful Shutdown

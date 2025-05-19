@@ -31,6 +31,23 @@ services:
       - "5671:5672"
       - "15672:15672"
 
+  rabbitmq-exporter:
+    image: kbudde/rabbitmq-exporter
+    container_name: rabbitmq-exporter
+    ports:
+      - "15692:15692"
+    networks:
+      - microservice
+    restart: always
+    environment:
+      - RABBIT_URL=http://guest:guest@rabbitmq:15672
+      - OUTPUT_FORMAT=prometheus
+      - PUBLISH_PORT=15692
+    depends_on:
+      - rabbitmq
+
+
+
   note-db:
     image: postgres:13
     container_name: note-db
@@ -53,6 +70,7 @@ services:
     container_name: prometheus
     networks:
       - webproxy
+      - microservice  # เพิ่ม microservice network
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
@@ -76,6 +94,7 @@ services:
     container_name: grafana
     networks:
       - microservice
+      - webproxy    # ✅ เพิ่มตรงนี้
     ports:
        - "3000:3000"
     environment:
