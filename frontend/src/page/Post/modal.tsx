@@ -7,9 +7,10 @@ import "./model.css";
 interface ReviewModalProps {
   isVisible: boolean;
   handleCancel: () => void;
+  refresh:boolean;
 }
 
-const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
+const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel,refresh }) => {
   const [reviews, setReviews] = useState<NotesInterface[]>([]);
   const [expandedReviewIds, setExpandedReviewIds] = useState<string[]>([]);
 
@@ -21,7 +22,7 @@ const Modal: React.FC<ReviewModalProps> = ({ isVisible, handleCancel }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     setExpandedReviewIds([]);

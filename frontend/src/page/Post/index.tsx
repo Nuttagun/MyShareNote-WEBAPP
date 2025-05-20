@@ -8,7 +8,7 @@ import "../../component/like/cute_like_button.css"; // Import the cute styles
 import { getLikesCount, likeNote, unlikeNote, getUserLikes } from "../../service/like";
 import CuteLikeButton from "../../component/like/cute_like_button_component.tsx";
 
-const Review = () => {
+const Review = ({ refresh }: { refresh: boolean }) => {
   const [notes, setNotes] = useState<NotesInterface[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -126,7 +126,7 @@ const Review = () => {
   useEffect(() => {
     fetchNotes();
     fetchUserLikes(); // Fetch user's liked notes on component mount
-  }, []);
+  }, [refresh]);
 
   if (notes.length === 0) {
     return (
@@ -202,7 +202,7 @@ const Review = () => {
           </Button>
         </center>
       </footer>
-      <ModalReview isVisible={isModalVisible} handleCancel={handleCancel} />
+      <ModalReview isVisible={isModalVisible} handleCancel={handleCancel} refresh={refresh} />
       <br />
     </div>
   );

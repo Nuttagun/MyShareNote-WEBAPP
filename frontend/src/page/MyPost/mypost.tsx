@@ -22,7 +22,7 @@ import "./mypost.css";
 import { getNotes, deleteNote } from "../../service/post";
 import ModalEdit from "./Edit/index"
 
-const Dashboard = () => {
+const Mypost = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -205,4 +205,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Mypost;
