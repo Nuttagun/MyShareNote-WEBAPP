@@ -78,3 +78,15 @@ export async function deleteNote(noteId : any) {
     return null;
   }
 }
+
+export async function getNotesByUserId(userId: number) {
+  try {
+    const response = await axios.get(`${apiUrl}/user/${userId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching notes for user ${userId}:`, error);
+    return null;
+  }
+}

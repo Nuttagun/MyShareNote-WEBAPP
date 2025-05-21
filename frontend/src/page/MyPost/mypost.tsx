@@ -19,7 +19,7 @@ import {
 import { MdEditSquare } from "react-icons/md";
 import "./mypost.css";
 
-import { getNotes, deleteNote } from "../../service/post";
+import { deleteNote ,getNotesByUserId } from "../../service/post";
 import ModalEdit from "./Edit/index"
 
 const Mypost = () => {
@@ -27,6 +27,9 @@ const Mypost = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchText, setSearchText] = useState<string>("");
+  const [user, setUser] = useState<number>(
+    Number(localStorage.getItem("user_id")) || 0
+  );
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
@@ -74,7 +77,8 @@ const Mypost = () => {
   };
 
   const handleReloadNotes = async () => {
-    const res = await getNotes();
+    const userId = user; // ✅ ตั้งค่าผู้ใช้ที่ต้องการ
+  const res = await getNotesByUserId(userId);
     if (res) {
       // เรียง notes ตาม note_id จากน้อยไปมาก
       const sortedNotes = res.sort((a: any, b: any) => a.note_id - b.note_id);
@@ -85,6 +89,7 @@ const Mypost = () => {
   };
 
   useEffect(() => {
+    setUser(Number(localStorage.getItem("user_id")));
     handleReloadNotes();
   }, []);
 

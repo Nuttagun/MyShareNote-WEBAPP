@@ -16,7 +16,7 @@ import { useUserID } from "../../decode/decodetoken";
 
 const AppBar = () => {
   const navigate = useNavigate();// @ts-ignore
-  const [username, setUsername] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);// @ts-ignore
   const [userId, setUserId] = useState<string | null>(null);
   const userInfo = useUserInfo();
   const uId = useUserID();

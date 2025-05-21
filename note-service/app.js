@@ -256,6 +256,28 @@ app.patch('/api/notes/:noteId', async (req, res) => {
   }
 });
 
+app.get('/api/notes/user/:userId', async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (isNaN(userId)) return res.status(400).json({ error: 'Invalid userId' });
+
+  try {
+    const result = await pgClient.query(`
+      SELECT n.*, u.username
+      FROM notes n
+      JOIN users u ON n.user_id = u.user_id
+      WHERE n.user_id = $1
+      ORDER BY n.note_id
+    `, [userId]);
+
+    res.json(result.rows);
+    noteReadCounter.inc(); // เพิ่ม metric ถ้าต้องการเก็บข้อมูล
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE note
 app.delete('/api/notes/:noteId', async (req, res) => {
   const noteId = Number(req.params.noteId);
