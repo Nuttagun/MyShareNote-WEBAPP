@@ -81,7 +81,9 @@ const AppBar = () => {
 
         <div className="part2 w-[40%] flex items-center justify-end gap-4">
 
-          <NotificationBell userId={userId || ""}/>
+          <NotificationBell userId={uId!} />
+
+
 
           <div className="relative">
             <div

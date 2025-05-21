@@ -1,3 +1,4 @@
+
 const express = require('express');
 const cors = require('cors');
 const { Client } = require('pg');
@@ -172,6 +173,13 @@ app.get('/api/social/likes/:noteId', async (req, res) => {
 app.post('/api/social/like', async (req, res) => {
   try {
     const { noteId, userId, noteTitle, noteOwnerId } = req.body;
+
+    // ดึงชื่อผู้ใช้จาก userId
+    const userResult = await pgClient.query(
+      'SELECT username FROM users WHERE user_id = $1', [userId]
+    );
+    const username = userResult.rows[0]?.username;
+
     await pgClient.query(
       'INSERT INTO likes (note_id, user_id) VALUES ($1, $2)',
       [noteId, userId]
@@ -181,7 +189,8 @@ app.post('/api/social/like', async (req, res) => {
     likeCounter.inc({ note_id: noteId, user_id: userId });
 
     // Send notification event
-    channel.sendToQueue('social_event_queue', 
+    console.log('Sending event to notification_event_queue:');
+    channel.sendToQueue('notification_event_queue', 
       Buffer.from(JSON.stringify({
         type: 'note_liked',
         noteId,
@@ -223,7 +232,7 @@ app.delete('/api/social/unlike/:noteId/:userId', async (req, res) => {
     
     // # อัปเดตจำนวนไลค์ปัจจุบันของโน้ต
     const result = await pgClient.query(
-      'SELECT COUNT(*) as likes FROM likes WHERE note_id = $1',
+      'SELECT COUNT(*) as likes FROM likes WHERE note_id = $1', 
       [noteId]
     );
     const likesCount = parseInt(result.rows[0].likes);

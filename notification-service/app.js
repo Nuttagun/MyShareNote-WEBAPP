@@ -1,3 +1,4 @@
+
 const express = require('express');
 const { Client } = require('pg');
 const amqp = require('amqplib');
@@ -122,6 +123,7 @@ const connectRabbitMQ = async () => {
     const connection = await amqp.connect('amqp://guest:guest@rabbitmq');
     channel = await connection.createChannel();
     await channel.assertQueue('note_rpc_queue');
+    await channel.assertQueue('notification_event_queue');
     console.log('Connected to RabbitMQ');
   } catch (err) {
     console.error('Failed to connect to RabbitMQ', err);
@@ -138,15 +140,27 @@ const connectRabbitMQ = async () => {
 //     res.status(500).json({ error: err.message });
 //   }
 // });
-app.get('/api/notifications/:userId', async (req, res) => {
-  const { userId } = req.params;
+// ดึงไลค์ทั้งหมดของ user คนนี้
+// app.get('/api/social/user-likes/:userId', async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const result = await pgClient.query(
+//       'SELECT note_id, created_at FROM likes WHERE user_id = $1',
+//       [userId]
+//     );
+//     res.json({ likes: result.rows }); 
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
+app.get('/api/notifications/:userId', async (req, res) => {
   try {
+    const { userId } = req.params;
     const result = await pgClient.query(
       'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
       [userId]
     );
-    notificationCreatedCounter.inc(); // หลัง INSERT INTO notifications
     res.json({ notifications: result.rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -174,6 +188,25 @@ const handleRPCRequest = async (msg) => {
   }
 };
 
+const startEventConsumer = async () => {
+  const eventQueue = 'notification_event_queue';
+
+  await channel.assertQueue(eventQueue,  { durable: true });
+
+  channel.consume(eventQueue, async msg => {
+    const data = JSON.parse(msg.content.toString());
+    console.log('Received event:', data);
+    if (data.type === 'note_liked') {
+      const message = `${data.fromUser} liked your note "${data.noteTitle}"`;  // ใช้ชื่อผู้ใช้จาก fromUser
+      console.log(`👍 ไลก์โน้ต: ${message}`);
+      await saveNotification(data.user_id, message);  // บันทึกแจ้งเตือน
+    }
+    channel.ack(msg);
+  });
+
+  console.log('✅ Listening for notification events...');
+};
+
 const saveNotification = async (userId, message) => {
   try {
     await pgClient.query(
@@ -184,32 +217,6 @@ const saveNotification = async (userId, message) => {
   } catch (err) {
     console.error('❌ บันทึกแจ้งเตือนล้มเหลว:', err);
   }
-};
-
-
-const startEventConsumer = async () => {
-  const eventQueue = 'notification_event_queue';
-
-  await channel.assertQueue(eventQueue, { durable: false });
-
-  channel.consume(eventQueue, async msg => {
-    const data = JSON.parse(msg.content.toString());
-
-    if (data.type === 'note_shared') {
-      console.log(`📩 แชร์โน้ต: จาก ${data.fromUser} ถึง ${data.user_id}: ${data.message}`);
-      await saveNotification(data.user_id, data.message);
-    }
-
-    if (data.type === 'note_liked') {
-      const message = `${data.fromUser} liked your note "${data.noteTitle}"`;
-      console.log(`👍 ไลก์โน้ต: ${message}`);
-      await saveNotification(data.user_id, message);
-    }
-
-    channel.ack(msg);
-  });
-
-  console.log('✅ Listening for notification events...');
 };
 
 // # เพิ่ม endpoint สำหรับ metrics (optional)
